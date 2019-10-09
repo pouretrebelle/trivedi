@@ -40,7 +40,7 @@ class AnimationDot {
         this.size < animation.nucleusMaxSize * 1.5
           ? this.size / 1.5
           : animation.nucleusMaxSize
-      this.spokeCount = Math.floor(5 + (this.size - this.nucleusSize) * 0.15)
+      this.spokeCount = Math.floor(5 + (this.size - this.nucleusSize) * 0.1)
     }
   }
 
@@ -56,18 +56,17 @@ class AnimationDot {
     } = this
     const { c } = animation
     c.save()
-
     c.translate(pos.x, pos.y)
-
     c.strokeStyle = color
-    c.beginPath()
-    c.arc(0, 0, size / 2, 0, Math.PI * 2, true)
-    c.stroke()
 
-    c.fillStyle = color
-    c.beginPath()
-    c.arc(0, 0, nucleusSize / 2, 0, Math.PI * 2, true)
-    c.fill()
+    // c.beginPath()
+    // c.arc(0, 0, size / 2, 0, Math.PI * 2, true)
+    // c.stroke()
+
+    // c.fillStyle = color
+    // c.beginPath()
+    // c.arc(0, 0, nucleusSize / 2, 0, Math.PI * 2, true)
+    // c.fill()
 
     const spoke = new Vector2(size / 2, 0)
     spoke.rotate(initialSpokeAngle)
@@ -76,7 +75,9 @@ class AnimationDot {
     Array.from({ length: spokeCount }, (v, i) => (i / spokeCount) * Math.PI * 2)
       .map((angle) => spoke.clone().rotate(angle))
       .forEach((pos) => {
-        c.moveTo(0, 0)
+        c.moveTo(pos.x, pos.y)
+        pos.multiplyEq(-0.75)
+        // pos.rotate(Math.PI).multiplyEq(0.5)
         c.lineTo(pos.x, pos.y)
       })
     c.stroke()

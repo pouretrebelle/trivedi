@@ -9,12 +9,12 @@ class Animation {
   pixelRatio = undefined
 
   frames = 0
-  count = 200
+  count = 320
   dots = []
 
-  minSize = 20
-  maxSize = 300
-  margin = 5
+  minSize = 25
+  maxSize = 150
+  margin = 2
   nucleusMaxSize = 50
 
   constructor(canvas) {
