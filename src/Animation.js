@@ -15,6 +15,7 @@ class Animation {
   minSize = 20
   maxSize = 300
   margin = 5
+  nucleusMaxSize = 50
 
   constructor(canvas) {
     this.width = canvas.width
