@@ -109,7 +109,9 @@ class AnimationDot {
 
   update = () => {
     const dotsToCheck = this.animation.dots.filter((dot) => dot !== this)
-    this.spokes.forEach((spoke) => {
+    const spokesToMove = this.spokes.filter((s) => !s.finishedMoving)
+
+    spokesToMove.forEach((spoke) => {
       const spokePosition = spoke.getCompoundPos()
 
       const otherPositions = dotsToCheck.reduce(
@@ -133,8 +135,11 @@ class AnimationDot {
 
       const distFromCenter = otherPosition.minusNew(this.pos).magnitude()
 
-      if (spoke.length + this.animation.margin < distFromCenter)
-        spoke.addToLength(1)
+      if (spoke.length + this.animation.margin < distFromCenter) {
+        return spoke.addToLength(1)
+      }
+
+      spoke.finished()
     })
   }
 }

@@ -1,6 +1,8 @@
 import Vector2 from './utils'
 
 class AnimationSpoke {
+  finishedMoving = false
+
   constructor(dot, initialAngle, length, i) {
     this.dot = dot
     this.length = length
@@ -15,6 +17,8 @@ class AnimationSpoke {
   }
 
   getCompoundPos = () => this.pos.plusNew(this.dot.pos)
+
+  finished = () => (this.finishedMoving = true)
 }
 
 export default AnimationSpoke
