@@ -1,5 +1,6 @@
 import Vector2, { randomFloat, randomInteger } from './utils'
 import AnimationSpoke from './AnimationSpoke'
+import bezierCurveThrough from './vendor/canvas-bezier-multipoint'
 
 class AnimationDot {
   size = undefined
@@ -50,7 +51,7 @@ class AnimationDot {
         size < animation.nucleusMaxSize * 1.5
           ? size / 1.5
           : animation.nucleusMaxSize
-      this.spokeCount = Math.floor(5 + (size - this.nucleusSize) * 0.15)
+      this.spokeCount = Math.floor(10 + (size - this.nucleusSize) * 0.3)
 
       this.startSize = size
       this.setInitialSpokes(size / 2)
@@ -74,12 +75,10 @@ class AnimationDot {
 
     c.translate(pos.x, pos.y)
 
+    c.lineWidth = 2
     c.strokeStyle = color
-    c.beginPath()
-    c.arc(0, 0, size / 2, 0, Math.PI * 2, true)
-    c.stroke()
-
     c.fillStyle = color
+
     c.beginPath()
     c.arc(0, 0, nucleusSize / 2, 0, Math.PI * 2, true)
     c.fill()
@@ -87,18 +86,22 @@ class AnimationDot {
     c.beginPath()
 
     // spokes
-    spokes.forEach((spoke) => {
-      c.moveTo(0, 0)
-      c.lineTo(spoke.pos.x, spoke.pos.y)
-    })
+    spokes
+      .filter((s, i) => i % 2 === 0) // every other spoke
+      .forEach((spoke) => {
+        c.moveTo(0, 0)
+        c.lineTo(spoke.pos.x, spoke.pos.y)
+      })
 
-    // arc
-    c.moveTo(spokes[0].pos.x, spokes[0].posy)
-    spokes.forEach((spoke) => {
-      c.lineTo(spoke.pos.x, spoke.pos.y)
-    })
-    c.lineTo(spokes[0].pos.x, spokes[0].pos.y)
+    c.stroke()
 
+    // todo: fix start/end meeting point
+    bezierCurveThrough(
+      c,
+      spokes
+        .map((spoke) => [spoke.pos.x, spoke.pos.y])
+        .concat([[spokes[0].pos.x, spokes[0].pos.y]])
+    )
     c.stroke()
 
     c.restore()

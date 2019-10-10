@@ -13,8 +13,8 @@ class Animation {
   dots = []
 
   minSize = 20
-  maxSize = 300
-  margin = 5
+  maxSize = 350
+  margin = 2
   nucleusMaxSize = 50
 
   constructor(canvas) {
