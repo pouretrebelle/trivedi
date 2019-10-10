@@ -13,7 +13,7 @@ class Animation {
   dots = []
 
   minSize = 20
-  maxSize = 250
+  maxSize = 300
   margin = 5
   nucleusMaxSize = 50
 

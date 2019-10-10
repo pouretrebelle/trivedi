@@ -9,6 +9,7 @@ class AnimationDot {
     this.animation = animation
     this.index = index
     this.pos = new Vector2(0, 0)
+    this.maxSize = 100 + Math.random() * (animation.maxSize - 100)
     this.color = '#002c00'
     this.initialSpokeAngle = Math.random() * Math.PI
     this.setRandomPosition()
@@ -37,10 +38,7 @@ class AnimationDot {
       this.setRandomPosition()
       this.setInitialSize()
     } else {
-      this.size = Math.min(
-        closestDistance * 2 - animation.margin,
-        animation.maxSize
-      )
+      this.size = Math.min(closestDistance * 2 - animation.margin, this.maxSize)
       this.nucleusSize =
         this.size < animation.nucleusMaxSize * 1.5
           ? this.size / 1.5
