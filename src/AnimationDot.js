@@ -1,9 +1,10 @@
-import Vector2, { randomFloat, randomInteger } from './Vector2'
+import Vector2, { randomFloat, randomInteger } from './utils'
 
 class AnimationDot {
   size = undefined
   nucleusSize = undefined
-  tendtrilCount = undefined
+  spokeCount = undefined
+  spokes = []
 
   constructor(animation, index) {
     this.animation = animation

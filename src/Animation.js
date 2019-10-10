@@ -1,4 +1,4 @@
-import { randomInteger } from './Vector2'
+import { randomInteger } from './utils'
 import AnimationDot from './AnimationDot'
 
 class Animation {
