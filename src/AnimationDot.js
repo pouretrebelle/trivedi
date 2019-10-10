@@ -31,7 +31,9 @@ class AnimationDot {
   setInitialSize = () => {
     const { animation, pos } = this
     const closestDistance = animation.dots
-      .map((dot) => Math.abs(dot.pos.minusNew(pos).magnitude()) - dot.size / 2)
+      .map(
+        (dot) => Math.abs(dot.pos.minusNew(pos).magnitude()) - dot.startSize / 2
+      )
       .concat(pos.x, pos.y, animation.width - pos.x, animation.height - pos.y)
       .reduce((prev, cur) => Math.min(prev, cur), Infinity)
 
@@ -39,25 +41,36 @@ class AnimationDot {
       this.setRandomPosition()
       this.setInitialSize()
     } else {
-      this.size = Math.min(closestDistance * 2 - animation.margin, this.maxSize)
+      const size = Math.min(
+        closestDistance * 2 - animation.margin,
+        this.maxSize
+      )
       this.nucleusSize =
-        this.size < animation.nucleusMaxSize * 1.5
-          ? this.size / 1.5
+        size < animation.nucleusMaxSize * 1.5
+          ? size / 1.5
           : animation.nucleusMaxSize
-      this.spokeCount = Math.floor(5 + (this.size - this.nucleusSize) * 0.15)
+      this.spokeCount = Math.floor(5 + (size - this.nucleusSize) * 0.15)
+
+      this.startSize = size
+      this.setInitialSpokes(size / 2)
     }
   }
 
+  setInitialSpokes = (length) => {
+    this.spokes = Array.from({ length: this.spokeCount }, (v, i) => length)
+  }
+
+  getSpokeAngle = (i) =>
+    this.initialSpokeAngle + (Math.PI * 2 * i) / this.spokeCount
+
+  getSpokePosition = (length, i) => {
+    const spoke = new Vector2(length, 0)
+    spoke.rotate(this.getSpokeAngle(i))
+    return spoke
+  }
+
   draw = () => {
-    const {
-      size,
-      nucleusSize,
-      spokeCount,
-      initialSpokeAngle,
-      pos,
-      color,
-      animation,
-    } = this
+    const { size, nucleusSize, spokes, pos, color, animation } = this
     const { c } = animation
     c.save()
 
@@ -73,16 +86,22 @@ class AnimationDot {
     c.arc(0, 0, nucleusSize / 2, 0, Math.PI * 2, true)
     c.fill()
 
-    const spoke = new Vector2(size / 2, 0)
-    spoke.rotate(initialSpokeAngle)
-
+    const spokePositions = spokes.map(this.getSpokePosition)
     c.beginPath()
-    Array.from({ length: spokeCount }, (v, i) => (i / spokeCount) * Math.PI * 2)
-      .map((angle) => spoke.clone().rotate(angle))
-      .forEach((pos) => {
-        c.moveTo(0, 0)
-        c.lineTo(pos.x, pos.y)
-      })
+
+    // spokes
+    spokePositions.forEach((pos) => {
+      c.moveTo(0, 0)
+      c.lineTo(pos.x, pos.y)
+    })
+
+    // arc
+    c.moveTo(spokePositions[0].x, spokePositions[0].y)
+    spokePositions.forEach((pos) => {
+      c.lineTo(pos.x, pos.y)
+    })
+    c.lineTo(spokePositions[0].x, spokePositions[0].y)
+
     c.stroke()
 
     c.restore()
