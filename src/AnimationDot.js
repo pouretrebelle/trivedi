@@ -3,7 +3,7 @@ import AnimationSpoke from './AnimationSpoke'
 import bezierCurveThrough from './vendor/canvas-bezier-multipoint'
 
 class AnimationDot {
-  size = undefined
+  startSize = undefined
   nucleusSize = undefined
   spokeCount = undefined
   spokes = []
@@ -21,12 +21,9 @@ class AnimationDot {
 
   setRandomPosition = () => {
     const { width, height } = this.animation
-
-    const radius = Math.random() * (Math.min(width, height) * 0.35)
     const angle = Math.random() * (Math.PI * 2)
-
-    const x = radius * Math.cos(angle) + width / 2
-    const y = radius * Math.sin(angle) + height / 2
+    const x = Math.random() * 0.35 * width * Math.cos(angle) + width / 2
+    const y = Math.random() * 0.35 * height * Math.sin(angle) + height / 2
     this.pos.reset(Math.round(x), Math.round(y))
   }
 
@@ -47,11 +44,8 @@ class AnimationDot {
         closestDistance * 2 - animation.margin,
         this.maxSize
       )
-      this.nucleusSize =
-        size < animation.nucleusMaxSize * 1.5
-          ? size / 1.5
-          : animation.nucleusMaxSize
-      this.spokeCount = Math.floor(10 + (size - this.nucleusSize) * 0.3)
+      this.nucleusSize = Math.pow(size, 0.75) + 5
+      this.spokeCount = Math.floor(7 + (size - this.nucleusSize) * 0.2) * 2
 
       this.startSize = size
       this.setInitialSpokes(size / 2)
@@ -132,10 +126,21 @@ class AnimationDot {
       }, Infinity)
 
       const otherPosition = otherPositions[otherIndex]
-
       const distFromCenter = otherPosition.minusNew(this.pos).magnitude()
 
-      if (spoke.length + this.animation.margin < distFromCenter) {
+      const prevSpoke =
+        this.spokes[spoke.i - 1] || this.spokes[this.spokeCount - 1]
+      const nextSpoke = this.spokes[spoke.i + 1] || this.spokes[0]
+
+      const neighbourSplit =
+        Math.abs(prevSpoke.length - spoke.length) +
+        Math.abs(nextSpoke.length - spoke.length)
+
+      if (
+        spoke.length + this.animation.margin < distFromCenter &&
+        spoke.length < this.startSize * 1.2 &&
+        neighbourSplit < 5
+      ) {
         return spoke.addToLength(1)
       }
 

@@ -5,6 +5,7 @@ class AnimationSpoke {
 
   constructor(dot, initialAngle, length, i) {
     this.dot = dot
+    this.i = i
     this.length = length
     this.angle = initialAngle + (Math.PI * 2 * i) / dot.spokeCount
     this.pos = new Vector2(length, 0)

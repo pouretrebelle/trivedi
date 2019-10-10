@@ -56,7 +56,8 @@ class Animation {
   }
 
   setup = () => {
-    for (var i = 0; i < this.count; i++) {
+    const count = this.width * this.height * 0.0001
+    for (var i = 0; i < count; i++) {
       this.dots.push(new AnimationDot(this, i))
     }
   }
