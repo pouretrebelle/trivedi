@@ -9,11 +9,11 @@ class Animation {
   pixelRatio = undefined
 
   frames = 0
-  count = 200
+  count = 50
   dots = []
 
   minSize = 20
-  maxSize = 300
+  maxSize = 250
   margin = 5
   nucleusMaxSize = 50
 

@@ -1,4 +1,4 @@
-import Vector2, { randomInteger } from './Vector2'
+import Vector2, { randomFloat, randomInteger } from './Vector2'
 
 class AnimationDot {
   size = undefined
@@ -16,9 +16,14 @@ class AnimationDot {
   }
 
   setRandomPosition = () => {
-    const x = randomInteger(0, this.animation.width)
-    const y = randomInteger(0, this.animation.height)
-    this.pos.reset(x, y)
+    const { width, height } = this.animation
+
+    const radius = Math.random() * (Math.min(width, height) * 0.35)
+    const angle = Math.random() * (Math.PI * 2)
+
+    const x = radius * Math.cos(angle) + width / 2
+    const y = radius * Math.sin(angle) + height / 2
+    this.pos.reset(Math.round(x), Math.round(y))
   }
 
   setInitialSize = () => {
