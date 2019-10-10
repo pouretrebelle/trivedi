@@ -1,4 +1,5 @@
 import Vector2, { randomFloat, randomInteger } from './utils'
+import AnimationSpoke from './AnimationSpoke'
 
 class AnimationDot {
   size = undefined
@@ -57,17 +58,14 @@ class AnimationDot {
   }
 
   setInitialSpokes = (length) => {
-    this.spokes = Array.from({ length: this.spokeCount }, (v, i) => length)
+    this.spokes = Array.from(
+      { length: this.spokeCount },
+      (v, i) => new AnimationSpoke(this, this.initialSpokeAngle, length, i)
+    )
   }
 
-  getSpokeAngle = (i) =>
-    this.initialSpokeAngle + (Math.PI * 2 * i) / this.spokeCount
-
-  getSpokePosition = (length, i) => {
-    const spoke = new Vector2(length, 0)
-    spoke.rotate(this.getSpokeAngle(i))
-    return spoke
-  }
+  getCompoundSpokePositions = () =>
+    this.spokes.map((spoke) => spoke.pos.plusNew(this.pos))
 
   draw = () => {
     const { size, nucleusSize, spokes, pos, color, animation } = this
@@ -86,28 +84,56 @@ class AnimationDot {
     c.arc(0, 0, nucleusSize / 2, 0, Math.PI * 2, true)
     c.fill()
 
-    const spokePositions = spokes.map(this.getSpokePosition)
     c.beginPath()
 
     // spokes
-    spokePositions.forEach((pos) => {
+    spokes.forEach((spoke) => {
       c.moveTo(0, 0)
-      c.lineTo(pos.x, pos.y)
+      c.lineTo(spoke.pos.x, spoke.pos.y)
     })
 
     // arc
-    c.moveTo(spokePositions[0].x, spokePositions[0].y)
-    spokePositions.forEach((pos) => {
-      c.lineTo(pos.x, pos.y)
+    c.moveTo(spokes[0].pos.x, spokes[0].posy)
+    spokes.forEach((spoke) => {
+      c.lineTo(spoke.pos.x, spoke.pos.y)
     })
-    c.lineTo(spokePositions[0].x, spokePositions[0].y)
+    c.lineTo(spokes[0].pos.x, spokes[0].pos.y)
 
     c.stroke()
 
     c.restore()
   }
 
-  update = () => {}
+  update = () => {
+    const dotsToCheck = this.animation.dots.filter((dot) => dot !== this)
+    this.spokes.forEach((spoke) => {
+      const spokePosition = spoke.getCompoundPos()
+
+      const otherPositions = dotsToCheck.reduce(
+        (acc, cur) => acc.concat(cur.getCompoundSpokePositions()),
+        []
+      )
+      const otherDistances = otherPositions.map((pos) =>
+        pos.minusNew(spokePosition).magnitude()
+      )
+
+      let otherIndex = undefined
+      const distFromSpoke = otherDistances.reduce((prev, cur, i) => {
+        if (cur < prev) {
+          otherIndex = i
+          return cur
+        }
+        return prev
+      }, Infinity)
+
+      const otherPosition = otherPositions[otherIndex]
+
+      const distFromCenter = otherPosition.minusNew(this.pos).magnitude()
+
+      if (spoke.length + this.animation.margin < distFromCenter)
+        spoke.addToLength(1)
+    })
+  }
 }
 
 export default AnimationDot
