@@ -9,7 +9,7 @@ class Animation {
   pixelRatio = undefined
 
   frames = 0
-  count = 50
+  predraw = 30
   dots = []
 
   minSize = 20
@@ -56,9 +56,17 @@ class Animation {
   }
 
   setup = () => {
+    this.dots = []
+
     const count = this.width * this.height * 0.0001
     for (var i = 0; i < count; i++) {
       this.dots.push(new AnimationDot(this, i))
+    }
+
+    for (var i = 0; i < this.predraw; i++) {
+      this.dots.forEach((dot) => {
+        dot.update()
+      })
     }
   }
 
@@ -78,7 +86,7 @@ class Animation {
 
     this.dots.forEach((dot) => {
       dot.draw()
-      dot.update()
+      // dot.update()
     })
 
     this.c.restore()
