@@ -45,7 +45,7 @@ class AnimationDot {
         this.maxSize
       )
       this.nucleusSize = Math.pow(size, 0.75) + 5
-      this.spokeCount = Math.floor(7 + (size - this.nucleusSize) * 0.2) * 2
+      this.spokeCount = Math.floor(7 + (size - this.nucleusSize) * 0.2)
 
       this.startSize = size
       this.setInitialSpokes(size / 2)
@@ -80,12 +80,10 @@ class AnimationDot {
     c.beginPath()
 
     // spokes
-    spokes
-      .filter((s, i) => i % 2 === 0) // every other spoke
-      .forEach((spoke) => {
-        c.moveTo(0, 0)
-        c.lineTo(spoke.pos.x, spoke.pos.y)
-      })
+    spokes.forEach((spoke) => {
+      c.moveTo(0, 0)
+      c.lineTo(spoke.pos.x, spoke.pos.y)
+    })
 
     c.stroke()
 
@@ -141,7 +139,7 @@ class AnimationDot {
         spoke.length < this.startSize * 1.2 &&
         neighbourSplit < 5
       ) {
-        return spoke.addToLength(1)
+        return spoke.addToLength(2)
       }
 
       spoke.finished()
