@@ -63,11 +63,11 @@ class Animation {
       this.dots.push(new AnimationDot(this, i))
     }
 
-    for (var i = 0; i < this.predraw; i++) {
-      this.dots.forEach((dot) => {
-        dot.update()
-      })
-    }
+    // for (var i = 0; i < this.predraw; i++) {
+    //   this.dots.forEach((dot) => {
+    //     dot.update()
+    //   })
+    // }
   }
 
   draw = () => {
@@ -86,7 +86,7 @@ class Animation {
 
     this.dots.forEach((dot) => {
       dot.draw()
-      // dot.update()
+      dot.update()
     })
 
     this.c.restore()

@@ -3,7 +3,7 @@ import AnimationSpoke from './AnimationSpoke'
 import bezierCurveThrough from './vendor/canvas-bezier-multipoint'
 
 class AnimationDot {
-  startSize = undefined
+  size = undefined
   nucleusSize = undefined
   spokeCount = undefined
   spokes = []
@@ -30,9 +30,7 @@ class AnimationDot {
   setInitialSize = () => {
     const { animation, pos } = this
     const closestDistance = animation.dots
-      .map(
-        (dot) => Math.abs(dot.pos.minusNew(pos).magnitude()) - dot.startSize / 2
-      )
+      .map((dot) => Math.abs(dot.pos.minusNew(pos).magnitude()) - dot.size / 2)
       .concat(pos.x, pos.y, animation.width - pos.x, animation.height - pos.y)
       .reduce((prev, cur) => Math.min(prev, cur), Infinity)
 
@@ -47,8 +45,8 @@ class AnimationDot {
       this.nucleusSize = Math.pow(size, 0.75) + 5
       this.spokeCount = Math.floor(7 + (size - this.nucleusSize) * 0.2)
 
-      this.startSize = size
       this.setInitialSpokes(size / 2)
+      this.size = size
     }
   }
 
@@ -59,11 +57,18 @@ class AnimationDot {
     )
   }
 
+  setSize = () => {
+    this.size =
+      (this.spokes.reduce((acc, cur) => acc + cur.length, 0) /
+        this.spokes.length) *
+      2
+  }
+
   getCompoundSpokePositions = () =>
     this.spokes.map((spoke) => spoke.pos.plusNew(this.pos))
 
   draw = () => {
-    const { size, nucleusSize, spokes, pos, color, animation } = this
+    const { nucleusSize, spokes, pos, color, animation } = this
     const { c } = animation
     c.save()
 
@@ -100,10 +105,19 @@ class AnimationDot {
   }
 
   update = () => {
-    const dotsToCheck = this.animation.dots.filter((dot) => dot !== this)
-    const spokesToMove = this.spokes.filter((s) => !s.finishedMoving)
+    this.setSize()
 
-    spokesToMove.forEach((spoke) => {
+    const dotsToCheck = this.animation.dots.filter((dot) => dot !== this)
+
+    dotsToCheck.forEach((dot) => {
+      const vec = this.pos.minusNew(dot.pos)
+      if (vec.magnitude() < (dot.size + this.size) * 0.5) {
+        this.pos.plusEq(vec.normalise())
+      }
+    })
+
+    this.spokes.forEach((spoke) => {
+      spoke.addToLength(-0.1)
       const spokePosition = spoke.getCompoundPos()
 
       const otherPositions = dotsToCheck.reduce(
@@ -134,13 +148,16 @@ class AnimationDot {
         Math.abs(prevSpoke.length - spoke.length) +
         Math.abs(nextSpoke.length - spoke.length)
 
-      if (
-        spoke.length + this.animation.margin < distFromCenter &&
-        spoke.length < this.startSize * 1.2 &&
-        neighbourSplit < 5
-      ) {
-        return spoke.addToLength(2)
+      if (spoke.length + this.animation.margin < distFromCenter) {
+        return spoke.addToLength(1)
       }
+
+      // if (
+      //   spoke.length + this.animation.margin < distFromCenter &&
+      //   neighbourSplit < 5
+      // ) {
+      //   return spoke.addToLength(1)
+      // }
 
       spoke.finished()
     })
