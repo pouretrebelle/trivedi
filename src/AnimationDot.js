@@ -22,8 +22,8 @@ class AnimationDot {
   setRandomPosition = () => {
     const { width, height } = this.animation
     const angle = Math.random() * (Math.PI * 2)
-    const x = Math.random() * 0.35 * width * Math.cos(angle) + width / 2
-    const y = Math.random() * 0.35 * height * Math.sin(angle) + height / 2
+    const x = Math.random() * 0.35 * width * Math.cos(angle)
+    const y = Math.random() * 0.35 * height * Math.sin(angle)
     this.pos.reset(Math.round(x), Math.round(y))
   }
 
@@ -33,7 +33,6 @@ class AnimationDot {
       .map(
         (dot) => Math.abs(dot.pos.minusNew(pos).magnitude()) - dot.startSize / 2
       )
-      .concat(pos.x, pos.y, animation.width - pos.x, animation.height - pos.y)
       .reduce((prev, cur) => Math.min(prev, cur), Infinity)
 
     if (closestDistance < animation.minSize / 2) {

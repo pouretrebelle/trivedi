@@ -33,6 +33,18 @@ class Animation {
     this.setup()
 
     window.requestAnimationFrame(this.loop)
+
+    window.addEventListener('resize', this.onResize)
+    document.body.addEventListener('click', this.reset)
+  }
+
+  reset = () => {
+    this.updateDimensions(document.body)
+    this.setup()
+  }
+
+  onResize = () => {
+    this.updateDimensions(document.body)
   }
 
   updateDimensions = (wrapperElement) => {
@@ -83,6 +95,7 @@ class Animation {
 
     this.c.save()
     this.c.scale(this.pixelRatio, this.pixelRatio)
+    this.c.translate(this.width / 2, this.height / 2)
 
     this.dots.forEach((dot) => {
       dot.draw()
