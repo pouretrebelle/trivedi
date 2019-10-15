@@ -8,7 +8,7 @@ class Animation {
   pixelRatio = undefined
 
   frames = 0
-  predraw = 30
+  predraw = 0
   dots = []
 
   color = '#002c00'
@@ -103,7 +103,7 @@ class Animation {
 
     this.dots.forEach((dot) => {
       dot.draw()
-      // dot.update()
+      dot.update()
     })
 
     this.c.restore()

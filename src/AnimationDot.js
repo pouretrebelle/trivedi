@@ -3,9 +3,11 @@ import AnimationSpoke from './AnimationSpoke'
 import bezierCurveThrough from './vendor/canvas-bezier-multipoint'
 
 class AnimationDot {
+  size = undefined
   startSize = undefined
   nucleusSize = undefined
   spokeCount = undefined
+  initialSpokeAngle = undefined
   spokes = []
 
   constructor(animation, index) {
@@ -13,7 +15,6 @@ class AnimationDot {
     this.index = index
     this.pos = new Vector2(0, 0)
     this.maxSize = 100 + Math.random() * (animation.maxSize - 100)
-    this.initialSpokeAngle = Math.random() * Math.PI
     this.setRandomPosition()
     this.setInitialSize()
   }
@@ -50,7 +51,15 @@ class AnimationDot {
     }
   }
 
+  setSize = () => {
+    this.size =
+      (this.spokes.reduce((acc, cur) => acc + cur.length, 0) /
+        this.spokes.length) *
+      2
+  }
+
   setInitialSpokes = (length) => {
+    this.initialSpokeAngle = (Math.random() * Math.PI * 2) / this.spokeCount
     this.spokes = Array.from(
       { length: this.spokeCount },
       (v, i) => new AnimationSpoke(this, this.initialSpokeAngle, length, i)
@@ -94,6 +103,7 @@ class AnimationDot {
 
   update = () => {
     this.updateSpokes()
+    this.setSize()
   }
 
   updateSpokes = () => {
@@ -101,14 +111,30 @@ class AnimationDot {
     const spokesToMove = this.spokes.filter((s) => !s.finishedMoving)
 
     spokesToMove.forEach((spoke) => {
-      const spokePosition = spoke.getCompoundPos()
+      const spokePos = spoke.getCompoundPos()
 
-      const otherPositions = dotsToCheck.reduce(
-        (acc, cur) => acc.concat(cur.getCompoundSpokePositions()),
-        []
-      )
+      if (!spoke.canGrow()) return spoke.finished()
+
+      const otherPositions = dotsToCheck
+        .filter(
+          (dot) =>
+            spokePos.minusNew(dot.pos).magnitude() <
+            spoke.length + dot.size / 2 + 50
+        )
+        .map((dot) => {
+          const vector = spokePos.minusNew(dot.pos)
+          const angle = vector.angle() - dot.initialSpokeAngle
+          const i =
+            Math.round(
+              (angle / (2 * Math.PI)) * dot.spokeCount + dot.spokeCount
+            ) % dot.spokeCount
+          return dot.spokes[i].getCompoundPos()
+        })
+
+      if (!otherPositions.length) return spoke.addToLength(2)
+
       const otherDistances = otherPositions.map((pos) =>
-        pos.minusNew(spokePosition).magnitude()
+        pos.minusNew(spokePos).magnitude()
       )
 
       let otherIndex = undefined
@@ -123,20 +149,8 @@ class AnimationDot {
       const otherPosition = otherPositions[otherIndex]
       const distFromCenter = otherPosition.minusNew(this.pos).magnitude()
 
-      const prevSpoke =
-        this.spokes[spoke.i - 1] || this.spokes[this.spokeCount - 1]
-      const nextSpoke = this.spokes[spoke.i + 1] || this.spokes[0]
-
-      const neighbourSplit =
-        Math.abs(prevSpoke.length - spoke.length) +
-        Math.abs(nextSpoke.length - spoke.length)
-
-      if (
-        spoke.length + this.animation.margin < distFromCenter &&
-        spoke.length < this.startSize * 1.2 &&
-        neighbourSplit < 5
-      ) {
-        return spoke.addToLength(2)
+      if (spoke.length + this.animation.margin < distFromCenter) {
+        return spoke.addToLength(1)
       }
 
       spoke.finished()
