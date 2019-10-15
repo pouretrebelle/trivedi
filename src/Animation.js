@@ -1,4 +1,5 @@
 import AnimationDot from './AnimationDot'
+import { map } from './utils'
 
 class Animation {
   canvas = undefined
@@ -8,13 +9,14 @@ class Animation {
   pixelRatio = undefined
 
   frames = 0
+  dotScale = undefined
   predraw = 0
   dots = []
 
   color = '#002c00'
   minSize = 20
   maxSize = 350
-  margin = 2
+  margin = 4
   nucleusMaxSize = 50
 
   constructor(canvas) {
@@ -69,8 +71,9 @@ class Animation {
 
   setup = () => {
     this.dots = []
+    this.frames = 0
 
-    const count = this.width * this.height * 0.0001
+    const count = this.width * this.height * 0.00005
     for (let i = 0; i < count; i++) {
       this.dots.push(new AnimationDot(this, i))
     }
@@ -85,6 +88,7 @@ class Animation {
   draw = () => {
     if (!this.c) return
     this.frames++
+    this.dotScale = Math.pow(map(this.frames, 0, 20, 0.99, 1, true), 10)
 
     this.c.lineWidth = 1
     this.c.strokeStyle = this.color

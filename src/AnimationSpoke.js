@@ -22,7 +22,6 @@ class AnimationSpoke {
   finished = () => (this.finishedMoving = true)
 
   canGrow = () => {
-    if (this.length > this.dot.animation.maxSize) return false
     if (this.length > this.dot.startSize > 1.2) return false
 
     const prevSpoke =

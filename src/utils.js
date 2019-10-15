@@ -6,6 +6,11 @@ export const randomInteger = (min, max) => {
   return Math.floor(Math.random() * (max + 1 - min)) + min
 }
 
+export const map = (value, low1, high1, low2, high2, clamp) => {
+  const val = low2 + ((high2 - low2) * (value - low1)) / (high1 - low1)
+  return clamp ? Math.min(Math.max(val, low2), high2) : val
+}
+
 const Vector2Const = {
   TO_DEGREES: 180 / Math.PI,
   TO_RADIANS: Math.PI / 180,

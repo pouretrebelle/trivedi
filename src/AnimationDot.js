@@ -71,12 +71,14 @@ class AnimationDot {
 
   draw = () => {
     const { nucleusSize, spokes, pos, animation } = this
-    const { c } = animation
+    const { c, dotScale } = animation
+    const s = (v) => dotScale * v
+
     c.save()
     c.translate(pos.x, pos.y)
 
     c.beginPath()
-    c.arc(0, 0, nucleusSize / 2, 0, Math.PI * 2, true)
+    c.arc(0, 0, s(nucleusSize / 2), 0, Math.PI * 2, true)
     c.fill()
 
     c.beginPath()
@@ -84,7 +86,7 @@ class AnimationDot {
     // spokes
     spokes.forEach((spoke) => {
       c.moveTo(0, 0)
-      c.lineTo(spoke.pos.x, spoke.pos.y)
+      c.lineTo(s(spoke.pos.x), s(spoke.pos.y))
     })
 
     c.stroke()
@@ -93,8 +95,8 @@ class AnimationDot {
     bezierCurveThrough(
       c,
       spokes
-        .map((spoke) => [spoke.pos.x, spoke.pos.y])
-        .concat([[spokes[0].pos.x, spokes[0].pos.y]])
+        .map((spoke) => [s(spoke.pos.x), s(spoke.pos.y)])
+        .concat([[s(spokes[0].pos.x), s(spokes[0].pos.y)]])
     )
     c.stroke()
 
@@ -119,7 +121,7 @@ class AnimationDot {
         .filter(
           (dot) =>
             spokePos.minusNew(dot.pos).magnitude() <
-            spoke.length + dot.size / 2 + 50
+            spoke.length + dot.size / 2 + 20
         )
         .map((dot) => {
           const vector = spokePos.minusNew(dot.pos)
