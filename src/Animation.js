@@ -1,4 +1,3 @@
-import { randomInteger } from './utils'
 import AnimationDot from './AnimationDot'
 
 class Animation {
@@ -12,6 +11,7 @@ class Animation {
   predraw = 30
   dots = []
 
+  color = '#002c00'
   minSize = 20
   maxSize = 350
   margin = 2
@@ -71,11 +71,11 @@ class Animation {
     this.dots = []
 
     const count = this.width * this.height * 0.0001
-    for (var i = 0; i < count; i++) {
+    for (let i = 0; i < count; i++) {
       this.dots.push(new AnimationDot(this, i))
     }
 
-    for (var i = 0; i < this.predraw; i++) {
+    for (let i = 0; i < this.predraw; i++) {
       this.dots.forEach((dot) => {
         dot.update()
       })
@@ -85,6 +85,10 @@ class Animation {
   draw = () => {
     if (!this.c) return
     this.frames++
+
+    this.c.lineWidth = 1
+    this.c.strokeStyle = this.color
+    this.c.fillStyle = this.color
 
     this.c.clearRect(
       0,

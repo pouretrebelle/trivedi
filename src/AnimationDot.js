@@ -1,4 +1,4 @@
-import Vector2, { randomFloat, randomInteger } from './utils'
+import Vector2 from './utils'
 import AnimationSpoke from './AnimationSpoke'
 import bezierCurveThrough from './vendor/canvas-bezier-multipoint'
 
@@ -13,7 +13,6 @@ class AnimationDot {
     this.index = index
     this.pos = new Vector2(0, 0)
     this.maxSize = 100 + Math.random() * (animation.maxSize - 100)
-    this.color = '#002c00'
     this.initialSpokeAngle = Math.random() * Math.PI
     this.setRandomPosition()
     this.setInitialSize()
@@ -44,7 +43,7 @@ class AnimationDot {
         this.maxSize
       )
       this.nucleusSize = Math.pow(size, 0.75) + 5
-      this.spokeCount = Math.floor(7 + (size - this.nucleusSize) * 0.2)
+      this.spokeCount = Math.floor(11 + (size - this.nucleusSize) * 0.4)
 
       this.startSize = size
       this.setInitialSpokes(size / 2)
@@ -62,15 +61,10 @@ class AnimationDot {
     this.spokes.map((spoke) => spoke.pos.plusNew(this.pos))
 
   draw = () => {
-    const { size, nucleusSize, spokes, pos, color, animation } = this
+    const { nucleusSize, spokes, pos, animation } = this
     const { c } = animation
     c.save()
-
     c.translate(pos.x, pos.y)
-
-    c.lineWidth = 2
-    c.strokeStyle = color
-    c.fillStyle = color
 
     c.beginPath()
     c.arc(0, 0, nucleusSize / 2, 0, Math.PI * 2, true)
@@ -99,6 +93,10 @@ class AnimationDot {
   }
 
   update = () => {
+    this.updateSpokes()
+  }
+
+  updateSpokes = () => {
     const dotsToCheck = this.animation.dots.filter((dot) => dot !== this)
     const spokesToMove = this.spokes.filter((s) => !s.finishedMoving)
 
@@ -114,7 +112,7 @@ class AnimationDot {
       )
 
       let otherIndex = undefined
-      const distFromSpoke = otherDistances.reduce((prev, cur, i) => {
+      otherDistances.reduce((prev, cur, i) => {
         if (cur < prev) {
           otherIndex = i
           return cur
