@@ -1,6 +1,7 @@
 import Vector2 from './utils'
 import AnimationSpoke from './AnimationSpoke'
 import bezierCurveThrough from './vendor/canvas-bezier-multipoint'
+import { map } from './utils'
 
 class AnimationDot {
   size = undefined
@@ -115,7 +116,7 @@ class AnimationDot {
     spokesToMove.forEach((spoke) => {
       const spokePos = spoke.getCompoundPos()
 
-      if (!spoke.canGrow()) return spoke.finished()
+      if (!spoke.canGrow()) return
 
       const otherPositions = dotsToCheck
         .filter(
@@ -133,7 +134,7 @@ class AnimationDot {
           return dot.spokes[i].getCompoundPos()
         })
 
-      if (!otherPositions.length) return spoke.addToLength(2)
+      if (!otherPositions.length) return spoke.setLength(spoke.length + 2)
 
       const otherDistances = otherPositions.map((pos) =>
         pos.minusNew(spokePos).magnitude()
@@ -152,10 +153,22 @@ class AnimationDot {
       const distFromCenter = otherPosition.minusNew(this.pos).magnitude()
 
       if (spoke.length + this.animation.margin < distFromCenter) {
-        return spoke.addToLength(1)
+        return spoke.setLength(spoke.length + 1)
       }
+    })
+  }
 
-      spoke.finished()
+  move = () => {
+    this.spokes.forEach((spoke) =>
+      spoke.setLength(spoke.length * 0.95 + this.startSize * 0.025)
+    )
+
+    this.animation.repulsors.forEach((repulsor) => {
+      const direction = this.pos.minusNew(repulsor.pos)
+      const strength =
+        map(direction.magnitude(), 400, 0, 0, 3, true) * repulsor.strength
+
+      this.pos.plusEq(direction.normalise().multiplyEq(strength))
     })
   }
 }

@@ -12,8 +12,8 @@ class AnimationSpoke {
     this.pos.rotate(this.angle)
   }
 
-  addToLength = (increment) => {
-    this.length += increment
+  setLength = (length) => {
+    this.length = length
     this.pos.normalise().multiplyEq(this.length)
   }
 

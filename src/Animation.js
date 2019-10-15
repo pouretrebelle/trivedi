@@ -1,4 +1,5 @@
 import AnimationDot from './AnimationDot'
+import AnimationRepulsor from './AnimationRepulsor'
 import { map } from './utils'
 
 class Animation {
@@ -12,6 +13,7 @@ class Animation {
   dotScale = undefined
   predraw = 0
   dots = []
+  repulsors = []
 
   color = '#002c00'
   minSize = 20
@@ -37,7 +39,7 @@ class Animation {
     window.requestAnimationFrame(this.loop)
 
     window.addEventListener('resize', this.onResize)
-    document.body.addEventListener('click', this.reset)
+    document.body.addEventListener('click', this.triggerAnimation)
   }
 
   reset = () => {
@@ -71,6 +73,7 @@ class Animation {
 
   setup = () => {
     this.dots = []
+    this.repulsors = []
     this.frames = 0
 
     const count = this.width * this.height * 0.00005
@@ -83,6 +86,15 @@ class Animation {
         dot.update()
       })
     }
+  }
+
+  triggerAnimation = (e) => {
+    this.repulsors.push(new AnimationRepulsor(this, e))
+  }
+
+  removeRepulsor = (repulsor) => {
+    const rIndex = this.repulsors.findIndex((r) => r === repulsor)
+    this.repulsors.splice(rIndex, 1)
   }
 
   draw = () => {
@@ -107,7 +119,18 @@ class Animation {
 
     this.dots.forEach((dot) => {
       dot.draw()
-      dot.update()
+      if (this.repulsors.length) {
+        dot.move()
+      } else {
+        dot.update()
+      }
+    })
+
+    this.repulsors.forEach((r) => {
+      r.update()
+      this.c.beginPath()
+      this.c.arc(r.pos.x, r.pos.y, 20 * r.strength, 0, Math.PI * 2, true)
+      this.c.fill()
     })
 
     this.c.restore()
