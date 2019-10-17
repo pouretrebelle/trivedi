@@ -104,9 +104,14 @@ class AnimationDot {
     c.restore()
   }
 
-  update = () => {
-    this.updateSpokes()
+  update = (hasRepulsors) => {
     this.setSize()
+
+    if (!hasRepulsors) {
+      this.grow()
+    } else {
+      this.move()
+    }
   }
 
   getNearestSpokeToPoint = (pos) => {
@@ -118,7 +123,9 @@ class AnimationDot {
     return this.spokes[i]
   }
 
-  updateSpokes = () => {
+  grow = (growth = 1) => {
+    if (growth < 0.1) return
+
     const dotsToCheck = this.animation.dots.filter((dot) => dot !== this)
     const spokesToMove = this.spokes.filter((s) => !s.finishedMoving)
 
@@ -133,7 +140,8 @@ class AnimationDot {
         )
         .map((dot) => dot.getNearestSpokeToPoint(spokePos).getCompoundPos())
 
-      if (!otherPositions.length) return spoke.setLength(spoke.length + 2)
+      if (!otherPositions.length)
+        return spoke.setLength(spoke.length + 1 * growth)
 
       const otherDistances = otherPositions.map((pos) =>
         pos.minusNew(spokePos).magnitude()
@@ -152,23 +160,62 @@ class AnimationDot {
       const distFromCenter = otherPosition.minusNew(this.pos).magnitude()
 
       if (spoke.length + this.animation.margin < distFromCenter) {
-        return spoke.setLength(spoke.length + 1)
+        return spoke.setLength(spoke.length + 1 * growth)
       }
     })
   }
 
   move = () => {
+    const { repulsors } = this.animation
+    const REPULSOR_DISTANCE = 400
+
+    const weightedRepulsorDistance = repulsors
+      .map((r) => r.pos.minusNew(this.pos).magnitude() / r.strength)
+      .reduce((prev, cur) => Math.min(prev, cur), Infinity)
+
+    // normalise/retract shape
+    const degreeToNormalise = map(
+      weightedRepulsorDistance,
+      REPULSOR_DISTANCE,
+      0,
+      0,
+      0.05,
+      true
+    )
     this.spokes.forEach((spoke) =>
-      spoke.setLength(spoke.length * 0.95 + this.startSize * 0.025)
+      spoke.setLength(
+        spoke.length * (1 - degreeToNormalise) +
+          (this.startSize / 2) * degreeToNormalise
+      )
     )
 
+    // push dots away from repulsors
     this.animation.repulsors.forEach((repulsor) => {
-      const direction = this.pos.minusNew(repulsor.pos)
+      const dir = this.pos.minusNew(repulsor.pos)
       const strength =
-        map(direction.magnitude(), 400, 0, 0, 3, true) * repulsor.strength
+        map(dir.magnitude(), REPULSOR_DISTANCE, 0, 0, 3, true) *
+        repulsor.strength
 
-      this.pos.plusEq(direction.normalise().multiplyEq(strength))
+      this.pos.plusEq(dir.normalise().multiplyEq(strength))
     })
+
+    // push dots away from eachother
+    this.animation.dots
+      .filter((dot) => dot !== this)
+      .forEach((dot) => {
+        const vec = this.pos.minusNew(dot.pos)
+
+        const distBetweenCentres = vec.magnitude()
+        const spoke1Length = this.getNearestSpokeToPoint(dot.pos).length
+        const spoke2Length = dot.getNearestSpokeToPoint(this.pos).length
+        const spaceBetween = distBetweenCentres - (spoke1Length + spoke2Length)
+
+        const vel = map(spaceBetween, 0, -5, 0, 2.5, true)
+        this.pos.plusEq(vec.normalise().multiplyEq(vel))
+      })
+
+    // grow shape
+    this.grow(map(weightedRepulsorDistance, 0, 1000, 0, 1, true))
   }
 }
 

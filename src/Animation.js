@@ -11,7 +11,7 @@ class Animation {
 
   frames = 0
   dotScale = undefined
-  predraw = 0
+  predraw = 10
   dots = []
   repulsors = []
 
@@ -40,6 +40,9 @@ class Animation {
 
     window.addEventListener('resize', this.onResize)
     document.body.addEventListener('click', this.triggerAnimation)
+    document.body.addEventListener('touchstart', (e) =>
+      this.triggerAnimation(e.touches[0])
+    )
   }
 
   reset = () => {
@@ -100,7 +103,10 @@ class Animation {
   draw = () => {
     if (!this.c) return
     this.frames++
-    this.dotScale = Math.pow(map(this.frames, 0, 20, 0.99, 1, true), 10)
+    this.dotScale = Math.pow(
+      map(this.frames, this.predraw, this.predraw + 20, 0.99, 1, true),
+      10
+    )
 
     this.c.lineWidth = 1
     this.c.strokeStyle = this.color
