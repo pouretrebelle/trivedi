@@ -1,12 +1,10 @@
-import Vector2 from './utils'
 import AnimationSpoke from './AnimationSpoke'
 import bezierCurveThrough from './vendor/canvas-bezier-multipoint'
-import { map } from './utils'
+import Vector2, { map } from './utils'
 
 class AnimationDot {
   size = undefined
   startSize = undefined
-  nucleusSize = undefined
   spokeCount = undefined
   initialSpokeAngle = undefined
   spokes = []
@@ -16,6 +14,7 @@ class AnimationDot {
     this.index = index
     this.pos = new Vector2(0, 0)
     this.maxSize = 100 + Math.random() * (animation.maxSize - 100)
+    this.spokeDensity = map(Math.random(), 0, 1, 0.2, 0.4)
     this.setRandomPosition()
     this.setInitialSize()
   }
@@ -44,8 +43,7 @@ class AnimationDot {
         closestDistance * 2 - animation.margin,
         this.maxSize
       )
-      this.nucleusSize = Math.pow(size, 0.75) + 5
-      this.spokeCount = Math.floor(11 + (size - this.nucleusSize) * 0.4)
+      this.spokeCount = Math.floor(2 + size * this.spokeDensity)
 
       this.startSize = size
       this.setInitialSpokes(size / 2)
@@ -71,7 +69,7 @@ class AnimationDot {
     this.spokes.map((spoke) => spoke.pos.plusNew(this.pos))
 
   draw = (color = this.animation.color) => {
-    const { nucleusSize, spokes, pos, animation } = this
+    const { size, spokes, pos, animation } = this
     const { c, dotScale } = animation
     const s = (v) => dotScale * v
 
@@ -98,6 +96,7 @@ class AnimationDot {
     )
     c.stroke()
 
+    const nucleusSize = Math.pow(size, 0.75) + 4
     c.beginPath()
     c.arc(0, 0, s(nucleusSize / 2), 0, Math.PI * 2, true)
     c.fill()
