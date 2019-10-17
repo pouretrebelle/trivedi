@@ -109,6 +109,15 @@ class AnimationDot {
     this.setSize()
   }
 
+  getNearestSpokeToPoint = (pos) => {
+    const vector = pos.minusNew(this.pos)
+    const angle = vector.angle() - this.initialSpokeAngle
+    const i =
+      Math.round((angle / (2 * Math.PI)) * this.spokeCount + this.spokeCount) %
+      this.spokeCount
+    return this.spokes[i]
+  }
+
   updateSpokes = () => {
     const dotsToCheck = this.animation.dots.filter((dot) => dot !== this)
     const spokesToMove = this.spokes.filter((s) => !s.finishedMoving)
@@ -120,19 +129,9 @@ class AnimationDot {
 
       const otherPositions = dotsToCheck
         .filter(
-          (dot) =>
-            spokePos.minusNew(dot.pos).magnitude() <
-            spoke.length + dot.size / 2 + 20
+          (dot) => spokePos.minusNew(dot.pos).magnitude() < dot.size / 2 + 20
         )
-        .map((dot) => {
-          const vector = spokePos.minusNew(dot.pos)
-          const angle = vector.angle() - dot.initialSpokeAngle
-          const i =
-            Math.round(
-              (angle / (2 * Math.PI)) * dot.spokeCount + dot.spokeCount
-            ) % dot.spokeCount
-          return dot.spokes[i].getCompoundPos()
-        })
+        .map((dot) => dot.getNearestSpokeToPoint(spokePos).getCompoundPos())
 
       if (!otherPositions.length) return spoke.setLength(spoke.length + 2)
 
