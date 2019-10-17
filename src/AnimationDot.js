@@ -167,7 +167,7 @@ class AnimationDot {
   }
 
   move = () => {
-    const { repulsors, c, colorScale, dotScale } = this.animation
+    const { repulsors, colorScale } = this.animation
     const REPULSOR_DISTANCE = 400
 
     const weightedRepulsorDistance = repulsors
@@ -186,7 +186,7 @@ class AnimationDot {
     this.spokes.forEach((spoke) =>
       spoke.setLength(
         spoke.length * (1 - degreeToNormalise) +
-          (this.startSize / 2) * degreeToNormalise
+          this.startSize * 0.4 * degreeToNormalise
       )
     )
 
