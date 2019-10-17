@@ -1,8 +1,6 @@
 import Vector2 from './utils'
 
 class AnimationSpoke {
-  finishedMoving = false
-
   constructor(dot, initialAngle, length, i) {
     this.dot = dot
     this.i = i
@@ -18,8 +16,6 @@ class AnimationSpoke {
   }
 
   getCompoundPos = () => this.pos.plusNew(this.dot.pos)
-
-  finished = () => (this.finishedMoving = true)
 
   canGrow = () => {
     if (this.length > this.dot.startSize > 1.2) return false

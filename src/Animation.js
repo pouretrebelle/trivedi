@@ -1,7 +1,7 @@
 import chroma from 'chroma-js'
 import AnimationDot from './AnimationDot'
 import AnimationRepulsor from './AnimationRepulsor'
-import { map } from './utils'
+import Vector2, { map } from './utils'
 
 class Animation {
   canvas = undefined

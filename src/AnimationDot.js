@@ -104,17 +104,6 @@ class AnimationDot {
     c.restore()
   }
 
-  update = (hasRepulsors) => {
-    this.setSize()
-
-    if (!hasRepulsors) {
-      this.grow()
-      this.draw()
-    } else {
-      this.move()
-    }
-  }
-
   getNearestSpokeToPoint = (pos) => {
     const vector = pos.minusNew(this.pos)
     const angle = vector.angle() - this.initialSpokeAngle
@@ -124,11 +113,11 @@ class AnimationDot {
     return this.spokes[i]
   }
 
-  grow = (growth = 1) => {
+  grow = (growth) => {
     if (growth < 0.1) return
 
     const dotsToCheck = this.animation.dots.filter((dot) => dot !== this)
-    const spokesToMove = this.spokes.filter((s) => !s.finishedMoving)
+    const spokesToMove = this.spokes
 
     spokesToMove.forEach((spoke) => {
       const spokePos = spoke.getCompoundPos()
@@ -166,59 +155,69 @@ class AnimationDot {
     })
   }
 
-  move = () => {
+  update = (hasRepulsors) => {
+    this.setSize()
+
     const { repulsors, colorScale } = this.animation
     const REPULSOR_DISTANCE = 400
+    let weightedRepulsorDistance
 
-    const weightedRepulsorDistance = repulsors
-      .map((r) => r.pos.minusNew(this.pos).magnitude() / r.strength)
-      .reduce((prev, cur) => Math.min(prev, cur), Infinity)
+    if (hasRepulsors) {
+      weightedRepulsorDistance = repulsors
+        .map((r) => r.pos.minusNew(this.pos).magnitude() / r.strength)
+        .reduce((prev, cur) => Math.min(prev, cur), Infinity)
 
-    // normalise/retract shape
-    const degreeToNormalise = map(
-      weightedRepulsorDistance,
-      REPULSOR_DISTANCE,
-      0,
-      0,
-      0.05,
-      true
-    )
-    this.spokes.forEach((spoke) =>
-      spoke.setLength(
-        spoke.length * (1 - degreeToNormalise) +
-          this.startSize * 0.4 * degreeToNormalise
+      // normalise/retract shape
+      const degreeToNormalise = map(
+        weightedRepulsorDistance,
+        REPULSOR_DISTANCE,
+        0,
+        0,
+        0.05,
+        true
       )
-    )
+      this.spokes.forEach((spoke) =>
+        spoke.setLength(
+          spoke.length * (1 - degreeToNormalise) +
+            this.startSize * 0.4 * degreeToNormalise
+        )
+      )
 
-    // push dots away from repulsors
-    this.animation.repulsors.forEach((repulsor) => {
-      const dir = this.pos.minusNew(repulsor.pos)
-      const strength =
-        map(dir.magnitude(), REPULSOR_DISTANCE, 0, 0, 3, true) *
-        repulsor.strength
+      // push dots away from repulsors
+      this.animation.repulsors.forEach((repulsor) => {
+        const dir = this.pos.minusNew(repulsor.pos)
+        const strength =
+          map(dir.magnitude(), REPULSOR_DISTANCE, 0, 0, 3, true) *
+          repulsor.strength
 
-      this.pos.plusEq(dir.normalise().multiplyEq(strength))
-    })
-
-    // push dots away from eachother
-    this.animation.dots
-      .filter((dot) => dot !== this)
-      .forEach((dot) => {
-        const vec = this.pos.minusNew(dot.pos)
-
-        const distBetweenCentres = vec.magnitude()
-        const spoke1Length = this.getNearestSpokeToPoint(dot.pos).length
-        const spoke2Length = dot.getNearestSpokeToPoint(this.pos).length
-        const spaceBetween = distBetweenCentres - (spoke1Length + spoke2Length)
-
-        const vel = map(spaceBetween, 0, -5, 0, 2.5, true)
-        this.pos.plusEq(vec.normalise().multiplyEq(vel))
+        this.pos.plusEq(dir.normalise().multiplyEq(strength))
       })
 
-    // grow shape
-    this.grow(map(weightedRepulsorDistance, 0, 1000, 0, 1, true))
+      // push dots away from eachother
+      this.animation.dots
+        .filter((dot) => dot !== this)
+        .forEach((dot) => {
+          const vec = this.pos.minusNew(dot.pos)
 
-    const fillStrength = map(weightedRepulsorDistance, 500, 0, 0, 1, true)
+          const distBetweenCentres = vec.magnitude()
+          const spoke1Length = this.getNearestSpokeToPoint(dot.pos).length
+          const spoke2Length = dot.getNearestSpokeToPoint(this.pos).length
+          const spaceBetween =
+            distBetweenCentres - (spoke1Length + spoke2Length)
+
+          const vel = map(spaceBetween, 0, -5, 0, 2.5, true)
+          this.pos.plusEq(vec.normalise().multiplyEq(vel))
+        })
+    }
+
+    // grow shape
+    this.grow(
+      hasRepulsors ? map(weightedRepulsorDistance, 0, 1000, 0, 1, true) : 1
+    )
+
+    const fillStrength = hasRepulsors
+      ? map(weightedRepulsorDistance, 500, 0, 0, 1, true)
+      : 0
     this.draw(colorScale(1 - Math.pow(fillStrength, 5)))
   }
 }
