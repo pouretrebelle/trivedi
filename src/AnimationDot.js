@@ -70,29 +70,26 @@ class AnimationDot {
   getCompoundSpokePositions = () =>
     this.spokes.map((spoke) => spoke.pos.plusNew(this.pos))
 
-  draw = () => {
+  draw = (color = this.animation.color) => {
     const { nucleusSize, spokes, pos, animation } = this
     const { c, dotScale } = animation
     const s = (v) => dotScale * v
 
     c.save()
     c.translate(pos.x, pos.y)
-
-    c.beginPath()
-    c.arc(0, 0, s(nucleusSize / 2), 0, Math.PI * 2, true)
-    c.fill()
-
-    c.beginPath()
+    c.fillStyle = color
+    c.strokeStyle = color
 
     // spokes
+    c.beginPath()
     spokes.forEach((spoke) => {
       c.moveTo(0, 0)
       c.lineTo(s(spoke.pos.x), s(spoke.pos.y))
     })
-
     c.stroke()
 
     // todo: fix start/end meeting point
+    c.beginPath()
     bezierCurveThrough(
       c,
       spokes
@@ -100,6 +97,10 @@ class AnimationDot {
         .concat([[s(spokes[0].pos.x), s(spokes[0].pos.y)]])
     )
     c.stroke()
+
+    c.beginPath()
+    c.arc(0, 0, s(nucleusSize / 2), 0, Math.PI * 2, true)
+    c.fill()
 
     c.restore()
   }
@@ -109,6 +110,7 @@ class AnimationDot {
 
     if (!hasRepulsors) {
       this.grow()
+      this.draw()
     } else {
       this.move()
     }
@@ -166,7 +168,7 @@ class AnimationDot {
   }
 
   move = () => {
-    const { repulsors } = this.animation
+    const { repulsors, c, colorScale, dotScale } = this.animation
     const REPULSOR_DISTANCE = 400
 
     const weightedRepulsorDistance = repulsors
@@ -216,6 +218,9 @@ class AnimationDot {
 
     // grow shape
     this.grow(map(weightedRepulsorDistance, 0, 1000, 0, 1, true))
+
+    const fillStrength = map(weightedRepulsorDistance, 500, 0, 0, 1, true)
+    this.draw(colorScale(1 - Math.pow(fillStrength, 5)))
   }
 }
 

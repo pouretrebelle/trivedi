@@ -1,3 +1,4 @@
+import chroma from 'chroma-js'
 import AnimationDot from './AnimationDot'
 import AnimationRepulsor from './AnimationRepulsor'
 import { map } from './utils'
@@ -16,6 +17,7 @@ class Animation {
   repulsors = []
 
   color = '#002c00'
+  colorScale = chroma.scale(['#ffffff', '#002c00'])
   minSize = 20
   maxSize = 350
   margin = 4
@@ -31,6 +33,7 @@ class Animation {
 
     this.canvas = canvas
     this.c = canvas.getContext('2d')
+    this.c.lineWidth = 1
 
     this.updateDimensions(document.body)
 
@@ -108,11 +111,12 @@ class Animation {
       10
     )
 
-    this.c.lineWidth = 1
-    this.c.strokeStyle = this.color
-    this.c.fillStyle = this.color
-
-    this.c.clearRect(
+    const maxRepulsorStrength = this.repulsors
+      .map((r) => r.strength)
+      .reduce((cur, prev) => Math.max(cur, prev), 0)
+    const bgScaleVal = Math.pow(maxRepulsorStrength, 1.5) * 0.8
+    this.c.fillStyle = this.colorScale(bgScaleVal)
+    this.c.fillRect(
       0,
       0,
       this.width * this.pixelRatio,
@@ -124,19 +128,11 @@ class Animation {
     this.c.translate(this.width / 2, this.height / 2)
 
     this.dots.forEach((dot) => {
-      dot.draw()
-      if (this.repulsors.length) {
-        dot.move()
-      } else {
-        dot.update()
-      }
+      dot.update(this.repulsors.length)
     })
 
     this.repulsors.forEach((r) => {
       r.update()
-      this.c.beginPath()
-      this.c.arc(r.pos.x, r.pos.y, 20 * r.strength, 0, Math.PI * 2, true)
-      this.c.fill()
     })
 
     this.c.restore()
