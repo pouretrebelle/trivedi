@@ -18,7 +18,7 @@ class AnimationSpoke {
   getCompoundPos = () => this.pos.plusNew(this.dot.pos)
 
   canGrow = () => {
-    if (this.length > this.dot.startSize > 1.2) return false
+    if (this.length > this.dot.startSize * 2.5) return false
 
     const prevSpoke =
       this.dot.spokes[this.i - 1] || this.dot.spokes[this.dot.spokeCount - 1]
