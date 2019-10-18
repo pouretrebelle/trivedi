@@ -216,7 +216,7 @@ class AnimationDot {
     )
 
     const fillStrength = hasRepulsors
-      ? map(weightedRepulsorDistance, 500, 0, 0, 1, true)
+      ? map(weightedRepulsorDistance, 300, 0, 0, 1, true)
       : 0
     this.draw(colorScale(1 - Math.pow(fillStrength, 5)))
   }

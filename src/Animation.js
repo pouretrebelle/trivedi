@@ -1,7 +1,7 @@
 import chroma from 'chroma-js'
 import AnimationDot from './AnimationDot'
 import AnimationRepulsor from './AnimationRepulsor'
-import Vector2, { map } from './utils'
+import { map } from './utils'
 
 class Animation {
   canvas = undefined
@@ -111,12 +111,7 @@ class Animation {
       10
     )
 
-    const maxRepulsorStrength = this.repulsors
-      .map((r) => r.strength)
-      .reduce((cur, prev) => Math.max(cur, prev), 0)
-    const bgScaleVal = Math.pow(maxRepulsorStrength, 1.5) * 0.8
-    this.c.fillStyle = this.colorScale(bgScaleVal)
-    this.c.fillRect(
+    this.c.clearRect(
       0,
       0,
       this.width * this.pixelRatio,
@@ -127,12 +122,12 @@ class Animation {
     this.c.scale(this.pixelRatio, this.pixelRatio)
     this.c.translate(this.width / 2, this.height / 2)
 
-    this.dots.forEach((dot) => {
-      dot.update(this.repulsors.length)
-    })
-
     this.repulsors.forEach((r) => {
       r.update()
+    })
+
+    this.dots.forEach((dot) => {
+      dot.update(this.repulsors.length)
     })
 
     this.c.restore()
