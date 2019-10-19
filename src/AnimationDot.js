@@ -43,7 +43,7 @@ class AnimationDot {
         closestDistance * 2 - animation.margin,
         this.maxSize
       )
-      this.spokeCount = Math.floor(2 + size * this.spokeDensity)
+      this.spokeCount = Math.floor(4 + size * this.spokeDensity)
 
       this.startSize = size
       this.setInitialSpokes(size / 2)
@@ -96,7 +96,7 @@ class AnimationDot {
     )
     c.stroke()
 
-    const nucleusSize = Math.pow(size, 0.75) + 4
+    const nucleusSize = Math.pow(size, 0.75)
     c.beginPath()
     c.arc(0, 0, s(nucleusSize / 2), 0, Math.PI * 2, true)
     c.fill()
