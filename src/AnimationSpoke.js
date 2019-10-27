@@ -20,6 +20,19 @@ class AnimationSpoke {
   canGrow = () => {
     if (this.length > Math.pow(this.dot.spokeCount, 1.5)) return false
 
+    const { width, height, margin } = this.dot.animation
+    const halfScreen = new Vector2(width / 2, height / 2)
+    const pos = this.getCompoundPos()
+    const bottomRight = pos.minusNew(halfScreen)
+    const topLeft = pos.plusNew(halfScreen)
+    if (
+      bottomRight.x > -margin ||
+      bottomRight.y > -margin ||
+      topLeft.x < margin ||
+      topLeft.y < margin
+    )
+      return false
+
     const prevSpoke =
       this.dot.spokes[this.i - 1] || this.dot.spokes[this.dot.spokeCount - 1]
     const nextSpoke = this.dot.spokes[this.i + 1] || this.dot.spokes[0]
